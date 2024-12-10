@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
 
     let linkStyles = "underline text-cyan-600 hover:text-cyan-300";

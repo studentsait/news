@@ -1,40 +1,64 @@
-import Link from "next/link";
+import React, { useEffect, useState } from 'react';
+import Navbar from '../components/Navbar';
+import NewsCard from '../components/NewsCard';
+import Footer from '../components/Footer';
+import { fetchNews, searchNews } from '../utils/api';
 
-export default function Home() {
+const Home = () => {
+    const [newsData, setNewsData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [category, setCategory] = useState('general');
 
-    let linkStyles = "underline text-cyan-600 hover:text-cyan-300";
-  
+    useEffect(() => {
+        const loadNews = async () => {
+            setLoading(true);
+            try {
+                const news = await fetchNews(category);
+                setNewsData(news);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadNews();
+    }, [category]);
+
+    const handleCategoryChange = (newCategory) => {
+        setCategory(newCategory);
+    };
+
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        const query = e.target.newsQuery.value;
+        if (query) {
+            setLoading(true);
+            try {
+                const news = await searchNews(query);
+                setNewsData(news);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     return (
-      <main>
-        <h1>CPRG306 Class Example</h1>
-        <p>Hello World!</p>
-        <h2>Example links</h2>
-        <ul>
-          <li>
-            <Link
-              className = {linkStyles}
-              href="./international/"
-            >
-              International News
-            </Link>
-          </li>
-          <li>
-            <Link
-              className={linkStyles}
-              href="./national"
-            >
-              National News
-            </Link>
-          </li>
-          <li>
-            <Link
-              className={linkStyles}
-              href="./local"
-            >
-              Local News
-            </Link>
-          </li>
-        </ul>
-      </main>
+        <div>
+            <Navbar onCategoryChange={handleCategoryChange} onSearch={handleSearch} />
+            <div className="container-fluid">
+                <div className="row m-3">
+                    {loading ? (
+                        <h5>Loading...</h5>
+                    ) : (
+                        newsData.map((news, index) => <NewsCard key={index} news={news} />)
+                    )}
+                </div>
+            </div>
+            <Footer />
+        </div>
     );
-  }
+};
+
+export default Home;
